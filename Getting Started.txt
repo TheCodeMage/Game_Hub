@@ -1,0 +1,19 @@
+git config --global --list
+git config --global user.name "TheCodeMage"
+git config --global user.email "mr.phyoekyawkyaw@gmail.com"
+
+py -m venv venv 
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+ .\Scripts\activate
+ 
+mkdir GameHub
+
+git init
+git remote add origin https://github.com/TheCodeMage/Game_Hub
+git add .
+git commit -m "Initial Commit"
+git push -u origin master
+
+py -m pip install Django
+python.exe -m pip install --upgrade pip
+django-admin startproject config .
