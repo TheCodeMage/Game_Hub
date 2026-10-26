@@ -4,6 +4,8 @@ git config --global user.email "mr.phyoekyawkyaw@gmail.com"
 
 py -m venv venv 
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+or
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
  .\Scripts\activate
  
 mkdir GameHub
@@ -14,6 +16,13 @@ git add .
 git commit -m "Initial Commit"
 git push -u origin master
 
+git config--global --get credential.helper
+or
+git config --show-origin --get-all credential.helper
+or
+git config --global credential.helper manager
+
 py -m pip install Django
 python.exe -m pip install --upgrade pip
 django-admin startproject config .
+python manage.py startapp store
