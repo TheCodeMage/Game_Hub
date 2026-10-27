@@ -1,0 +1,94 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta name="description" content="{% block meta_description %}GameHub - Discover your next favorite PC game.{% endblock %}">
+
+    <title>{% block title %}GameHub{% endblock %}</title>
+
+    <link rel="stylesheet" href="{% static 'store/css/style.css' %}">
+    <script src="{% static 'store/js/store.js' %}" defer></script>
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-inner">
+            <a class="brand" href="{% url 'store:home' %}" aria-label="GameHub home">
+                <span class="brand-icon">G</span>
+                <span>GAME<span class="brand-accent">HUB</span></span>
+            </a>
+
+            <button
+                class="menu-toggle"
+                type="button"
+                aria-expanded="false"
+                aria-controls="main-navigation"
+                aria-label="Toggle navigation"
+                data-menu-toggle
+            >
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <nav class="main-navigation" id="main-navigation" data-navigation>
+                <a href="{% url 'store:home' %}"
+                   class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                    Home
+                </a>
+
+                <a href="{% url 'store:catalog' %}"
+                   class="{% if request.resolver_match.url_name == 'catalog' or request.resolver_match.url_name == 'game_detail' %}active{% endif %}">
+                    Explore Games
+                </a>
+            </nav>
+
+            <form class="header-search" action="{% url 'store:catalog' %}" method="get" role="search">
+                <label class="visually-hidden" for="header-search-input">Search games</label>
+                <span class="search-symbol" aria-hidden="true">⌕</span>
+                <input
+                    id="header-search-input"
+                    type="search"
+                    name="q"
+                    placeholder="Search games..."
+                    maxlength="200"
+                >
+                <button type="submit" class="visually-hidden">Search</button>
+            </form>
+
+            <div class="header-actions">
+                <a class="button button-outline button-small"
+                   href="{% url 'store:catalog' %}">
+                    Browse
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main id="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <a class="brand footer-brand" href="{% url 'store:home' %}">
+                <span class="brand-icon">G</span>
+                <span>GAME<span class="brand-accent">HUB</span></span>
+            </a>
+
+            <p>
+                Discover games. Explore worlds.
+                <span class="footer-demo-label">Portfolio Demo</span>
+            </p>
+
+            <p class="footer-copy">
+                &copy; {% now "Y" %} GameHub. Educational project.
+            </p>
+        </div>
+    </footer>
+</body>
+</html>

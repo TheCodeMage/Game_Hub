@@ -1,0 +1,279 @@
+
+{% extends "store/base.html" %}
+
+{% block title %}{{ game.title }} — GameHub{% endblock %}
+
+{% block meta_description %}
+Explore {{ game.title }}, including its description, price, platforms, system requirements and reviews.
+{% endblock %}
+
+{% block content %}
+<section class="container detail-page">
+    <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="{% url 'store:home' %}">Home</a>
+        <span>/</span>
+        <a href="{% url 'store:catalog' %}">Games</a>
+        <span>/</span>
+        <span aria-current="page">{{ game.title }}</span>
+    </nav>
+
+    <div class="detail-layout">
+        <div class="detail-main">
+            <div class="detail-cover">
+                {% if game.cover_image_url %}
+                    <img src="{{ game.cover_image_url }}"
+                         alt="{{ game.title }} cover">
+                {% else %}
+                    <div class="image-placeholder detail-placeholder">
+                        <span>GAMEHUB</span>
+                        <strong>{{ game.title }}</strong>
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if game.screenshots.all %}
+                <section class="detail-section">
+                    <div class="section-heading compact-heading">
+                        <div>
+                            <span class="eyebrow">IN-GAME LOOK</span>
+                            <h2>Screenshots</h2>
+                        </div>
+                    </div>
+
+                    <div class="screenshot-grid">
+                        {% for screenshot in game.screenshots.all %}
+                            <figure class="screenshot-card">
+                                <img src="{{ screenshot.image_url }}"
+                                     alt="{{ screenshot.caption|default:game.title }}"
+                                     loading="lazy">
+                                {% if screenshot.caption %}
+                                    <figcaption>{{ screenshot.caption }}</figcaption>
+                                {% endif %}
+                            </figure>
+                        {% endfor %}
+                    </div>
+                </section>
+            {% endif %}
+
+            <section class="detail-section">
+                <span class="eyebrow">ABOUT THIS GAME</span>
+                <h2>About {{ game.title }}</h2>
+
+                {% if game.description %}
+                    <div class="description-text">{{ game.description|linebreaks }}</div>
+                {% else %}
+                    <p class="muted-text">No description has been added yet.</p>
+                {% endif %}
+            </section>
+
+            <section class="detail-section">
+                <span class="eyebrow">TECHNICAL INFORMATION</span>
+                <h2>System Requirements</h2>
+
+                {% for requirement in game.system_requirements.all %}
+                    <div class="requirement-card">
+                        <div class="requirement-heading">
+                            <h3>{{ requirement.platform.name }}</h3>
+                            <span class="requirement-badge">
+                                {{ requirement.get_requirement_type_display }}
+                            </span>
+                        </div>
+
+                        <dl class="spec-list">
+                            {% if requirement.os_version %}
+                                <div>
+                                    <dt>Operating System</dt>
+                                    <dd>{{ requirement.os_version }}</dd>
+                                </div>
+                            {% endif %}
+
+                            {% if requirement.processor %}
+                                <div>
+                                    <dt>Processor</dt>
+                                    <dd>{{ requirement.processor }}</dd>
+                                </div>
+                            {% endif %}
+
+                            {% if requirement.memory %}
+                                <div>
+                                    <dt>Memory</dt>
+                                    <dd>{{ requirement.memory }}</dd>
+                                </div>
+                            {% endif %}
+
+                            {% if requirement.graphics %}
+                                <div>
+                                    <dt>Graphics</dt>
+                                    <dd>{{ requirement.graphics }}</dd>
+                                </div>
+                            {% endif %}
+
+                            {% if requirement.directx %}
+                                <div>
+                                    <dt>DirectX</dt>
+                                    <dd>{{ requirement.directx }}</dd>
+                                </div>
+                            {% endif %}
+
+                            {% if requirement.storage %}
+                                <div>
+                                    <dt>Storage</dt>
+                                    <dd>{{ requirement.storage }}</dd>
+                                </div>
+                            {% endif %}
+
+                            {% if requirement.additional_notes %}
+                                <div>
+                                    <dt>Additional Notes</dt>
+                                    <dd>{{ requirement.additional_notes|linebreaksbr }}</dd>
+                                </div>
+                            {% endif %}
+                        </dl>
+                    </div>
+                {% empty %}
+                    <p class="muted-text">
+                        System requirements have not been added yet.
+                    </p>
+                {% endfor %}
+            </section>
+
+            <section class="detail-section" id="reviews">
+                <div class="section-heading compact-heading">
+                    <div>
+                        <span class="eyebrow">PLAYER FEEDBACK</span>
+                        <h2>Community Reviews</h2>
+                    </div>
+
+                    {% if game.average_rating %}
+                        <div class="rating-summary">
+                            <strong>★ {{ game.average_rating|floatformat:1 }}</strong>
+                            <span>{{ game.review_count }} reviews</span>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="review-list">
+                    {% for review in reviews %}
+                        <article class="review-card">
+                            <div class="review-header">
+                                <div class="review-avatar" aria-hidden="true">
+                                    {{ review.user.username|first|upper }}
+                                </div>
+
+                                <div>
+                                    <h3>{{ review.user.username }}</h3>
+                                    <p class="muted-text">
+                                        {{ review.created_at|date:"M d, Y" }}
+                                    </p>
+                                </div>
+
+                                <span class="review-rating">
+                                    ★ {{ review.rating }}/5
+                                </span>
+                            </div>
+
+                            {% if review.comment %}
+                                <div class="review-comment">
+                                    {{ review.comment|linebreaks }}
+                                </div>
+                            {% else %}
+                                <p class="muted-text">No written comment.</p>
+                            {% endif %}
+                        </article>
+                    {% empty %}
+                        <div class="empty-inline">
+                            <span aria-hidden="true">☆</span>
+                            <p>No published reviews yet.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
+        </div>
+
+        <aside class="detail-sidebar">
+            <div class="purchase-panel">
+                <span class="eyebrow">GAME OVERVIEW</span>
+                <h1>{{ game.title }}</h1>
+
+                {% if game.average_rating %}
+                    <div class="detail-rating">
+                        <span aria-hidden="true">★</span>
+                        <strong>{{ game.average_rating|floatformat:1 }}/5</strong>
+                        <span class="muted-text">({{ game.review_count }} reviews)</span>
+                    </div>
+                {% else %}
+                    <p class="muted-text">Not rated yet</p>
+                {% endif %}
+
+                <div class="detail-price">
+                    {% if game.discount_percent %}
+                        <span class="discount-badge">-{{ game.discount_percent }}%</span>
+                        <div>
+                            <del>{{ game.price|floatformat:2 }} {{ game.currency }}</del>
+                            <strong>{{ game.discounted_price|floatformat:2 }} {{ game.currency }}</strong>
+                        </div>
+                    {% else %}
+                        <strong>{{ game.price|floatformat:2 }} {{ game.currency }}</strong>
+                    {% endif %}
+                </div>
+
+                <p class="demo-notice">
+                    Portfolio preview. Purchase and wishlist features will be added in a later phase.
+                </p>
+
+                <div class="detail-metadata">
+                    <div>
+                        <span>Developer</span>
+                        <strong>{{ game.developer|default:"Not specified" }}</strong>
+                    </div>
+
+                    <div>
+                        <span>Publisher</span>
+                        <strong>{{ game.publisher|default:"Not specified" }}</strong>
+                    </div>
+
+                    <div>
+                        <span>Release Date</span>
+                        <strong>
+                            {% if game.release_date %}
+                                {{ game.release_date|date:"M d, Y" }}
+                            {% else %}
+                                Not announced
+                            {% endif %}
+                        </strong>
+                    </div>
+
+                    <div>
+                        <span>Platforms</span>
+                        <div class="metadata-tags">
+                            {% for platform in game.platforms.all %}
+                                <span>{{ platform.name }}</span>
+                            {% empty %}
+                                <span>Not specified</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div>
+                        <span>Genres</span>
+                        <div class="metadata-tags">
+                            {% for genre in game.genres.all %}
+                                <a href="{% url 'store:catalog' %}?genre={{ genre.slug|urlencode }}">
+                                    {{ genre.name }}
+                                </a>
+                            {% empty %}
+                                <span>Not specified</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <a class="button button-primary button-full"
+                   href="{% url 'store:catalog' %}">
+                    Continue Exploring
+                </a>
+            </div>
+        </aside>
+    </div>
+</section>
+{% endblock %}

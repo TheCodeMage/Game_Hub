@@ -1,0 +1,259 @@
+
+{% extends "store/base.html" %}
+
+{% block title %}Explore Games — GameHub{% endblock %}
+
+{% block meta_description %}
+Search and filter PC games by genre, platform, price and release date.
+{% endblock %}
+
+{% block content %}
+<section class="page-banner">
+    <div class="container">
+        <span class="eyebrow">THE GAME LIBRARY</span>
+        <h1>Explore <span class="gradient-text">Games</span></h1>
+        <p>Find your next adventure from the GameHub catalog.</p>
+    </div>
+</section>
+
+<section class="container catalog-layout">
+    <aside class="filter-panel">
+        <div class="filter-heading">
+            <h2>Filters</h2>
+            <a class="text-link small-link" href="{% url 'store:catalog' %}">
+                Reset
+            </a>
+        </div>
+
+        <form method="get" action="{% url 'store:catalog' %}" id="catalog-filters">
+            <div class="filter-group">
+                <label for="catalog-search">Search games</label>
+                <input
+                    class="form-control"
+                    type="search"
+                    id="catalog-search"
+                    name="q"
+                    value="{{ search_query }}"
+                    placeholder="Game or developer..."
+                    maxlength="200"
+                >
+            </div>
+
+            <div class="filter-group">
+                <label for="genre-filter">Genre</label>
+                <select class="form-control" id="genre-filter" name="genre">
+                    <option value="">All genres</option>
+                    {% for genre in genres %}
+                        <option value="{{ genre.slug }}"
+                            {% if selected_genre == genre.slug %}selected{% endif %}>
+                            {{ genre.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label for="platform-filter">Platform</label>
+                <select class="form-control" id="platform-filter" name="platform">
+                    <option value="">All platforms</option>
+                    {% for platform in platforms %}
+                        <option value="{{ platform.code }}"
+                            {% if selected_platform == platform.code %}selected{% endif %}>
+                            {{ platform.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>Price Range</label>
+                <div class="price-inputs">
+                    <div>
+                        <label class="visually-hidden" for="min-price">Minimum price</label>
+                        <input
+                            class="form-control"
+                            type="number"
+                            id="min-price"
+                            name="min_price"
+                            value="{{ min_price }}"
+                            min="0"
+                            step="0.01"
+                            placeholder="Min"
+                        >
+                    </div>
+                    <div>
+                        <label class="visually-hidden" for="max-price">Maximum price</label>
+                        <input
+                            class="form-control"
+                            type="number"
+                            id="max-price"
+                            name="max_price"
+                            value="{{ max_price }}"
+                            min="0"
+                            step="0.01"
+                            placeholder="Max"
+                        >
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <label for="sort-filter">Sort by</label>
+                <select class="form-control" id="sort-filter" name="sort">
+                    <option value="title" {% if sort == "title" %}selected{% endif %}>
+                        Name: A–Z
+                    </option>
+                    <option value="price_asc" {% if sort == "price_asc" %}selected{% endif %}>
+                        Price: Low to High
+                    </option>
+                    <option value="price_desc" {% if sort == "price_desc" %}selected{% endif %}>
+                        Price: High to Low
+                    </option>
+                    <option value="newest" {% if sort == "newest" %}selected{% endif %}>
+                        Newest Releases
+                    </option>
+                    <option value="rating" {% if sort == "rating" %}selected{% endif %}>
+                        Highest Rated
+                    </option>
+                </select>
+            </div>
+
+            {% if price_error %}
+                <p class="form-error" role="alert">{{ price_error }}</p>
+            {% endif %}
+
+            <button class="button button-primary button-full" type="submit">
+                Apply Filters
+            </button>
+        </form>
+    </aside>
+
+    <div class="catalog-main">
+        <div class="catalog-toolbar">
+            <div>
+                <h2>Game Catalog</h2>
+                <p class="muted-text">
+                    {% if page_obj.paginator.count == 1 %}
+                        1 game found
+                    {% else %}
+                        {{ page_obj.paginator.count }} games found
+                    {% endif %}
+                </p>
+            </div>
+
+            <button class="button button-outline mobile-filter-toggle"
+                    type="button"
+                    data-filter-toggle
+                    aria-expanded="false"
+                    aria-controls="catalog-filters">
+                Filters
+            </button>
+        </div>
+
+        {% if search_query %}
+            <div class="active-filter">
+                Search: <strong>{{ search_query }}</strong>
+                <a href="{% url 'store:catalog' %}" aria-label="Clear all filters">×</a>
+            </div>
+        {% endif %}
+
+        <div class="game-grid catalog-grid">
+            {% for game in games %}
+                <article class="game-card">
+                    <a class="game-card-image"
+                       href="{% url 'store:game_detail' slug=game.slug %}">
+                        {% if game.cover_image_url %}
+                            <img src="{{ game.cover_image_url }}"
+                                 alt="{{ game.title }} cover"
+                                 loading="lazy">
+                        {% else %}
+                            <div class="image-placeholder">
+                                <span>GAMEHUB</span>
+                                <strong>{{ game.title }}</strong>
+                            </div>
+                        {% endif %}
+
+                        {% if game.discount_percent %}
+                            <span class="discount-badge">-{{ game.discount_percent }}%</span>
+                        {% endif %}
+                    </a>
+
+                    <div class="game-card-body">
+                        <div class="game-card-genres">
+                            {% for genre in game.genres.all|slice:":2" %}
+                                <span>{{ genre.name }}</span>
+                            {% empty %}
+                                <span>PC Game</span>
+                            {% endfor %}
+                        </div>
+
+                        <h3>
+                            <a href="{% url 'store:game_detail' slug=game.slug %}">
+                                {{ game.title }}
+                            </a>
+                        </h3>
+
+                        {% if game.average_rating %}
+                            <p class="rating-line">
+                                <span aria-hidden="true">★</span>
+                                {{ game.average_rating|floatformat:1 }}
+                                <span class="muted-text">({{ game.review_count }})</span>
+                            </p>
+                        {% else %}
+                            <p class="rating-line muted-text">No reviews yet</p>
+                        {% endif %}
+
+                        <div class="game-card-bottom">
+                            <span class="game-price">
+                                {% if game.discount_percent %}
+                                    <del>{{ game.price|floatformat:2 }} {{ game.currency }}</del>
+                                    <strong>{{ game.discounted_price|floatformat:2 }} {{ game.currency }}</strong>
+                                {% else %}
+                                    <strong>{{ game.price|floatformat:2 }} {{ game.currency }}</strong>
+                                {% endif %}
+                            </span>
+
+                            <a class="card-arrow"
+                               href="{% url 'store:game_detail' slug=game.slug %}"
+                               aria-label="View {{ game.title }}">
+                                ↗
+                            </a>
+                        </div>
+                    </div>
+                </article>
+            {% empty %}
+                <div class="empty-state catalog-empty">
+                    <span class="empty-icon">⌕</span>
+                    <h3>No games found</h3>
+                    <p>Try a different search or remove some filters.</p>
+                    <a class="button button-primary" href="{% url 'store:catalog' %}">
+                        Clear Filters
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+
+        {% if page_obj.paginator.num_pages > 1 %}
+            <nav class="pagination" aria-label="Catalog pagination">
+                {% if page_obj.has_previous %}
+                    <a class="pagination-link"
+                       href="?{% if querystring %}{{ querystring }}&amp;{% endif %}page={{ page_obj.previous_page_number }}">
+                        ← Previous
+                    </a>
+                {% endif %}
+
+                <span class="pagination-current">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+
+                {% if page_obj.has_next %}
+                    <a class="pagination-link"
+                       href="?{% if querystring %}{{ querystring }}&amp;{% endif %}page={{ page_obj.next_page_number }}">
+                        Next →
+                    </a>
+                {% endif %}
+            </nav>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
